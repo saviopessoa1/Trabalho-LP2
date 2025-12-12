@@ -1,5 +1,4 @@
-package bsi.LP2.vca;
-
+package bsi.LP2.vca.Savio;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ public class GerenciadorEvento {
      * Inicializa as oficinas exigidas no TEMA VI caso seja a primeira execução.
      */
     private void inicializarOficinasPadrao() {
-        System.out.println("Inicializando oficinas padrão...");
         oficinas.add(new Oficina("jQuery"));
         oficinas.add(new Oficina("Arduino"));
         oficinas.add(new Oficina("Desenvolvimento para Android"));
@@ -78,22 +76,28 @@ public class GerenciadorEvento {
     }
 
     /**
-     * Busca participante por CPF para exibir detalhes.
+     * Busca participante por CPF para exibir detalhes formatados.
      */
     public String consultarPorCpf(String cpf) {
         for (Participante p : participantes) {
             if (p.getCpf().equals(cpf)) {
                 StringBuilder sb = new StringBuilder();
-                sb.append("\n=== DETALHES DO PARTICIPANTE ===\n");
-                sb.append(p.toString()).append("\n");
-                sb.append("Oficinas Inscritas:\n");
+                sb.append("╔═══════════════════════════════════════════════╗\n");
+                sb.append("║           DETALHES DO PARTICIPANTE            ║\n");
+                sb.append("╠═══════════════════════════════════════════════╣\n");
+                sb.append(String.format("║ Nome: %-39s ║\n", truncar(p.getNome(), 39)));
+                sb.append(String.format("║ CPF:  %-39s ║\n", p.getCpf()));
+                sb.append(String.format("║ Idade:%-39s ║\n", p.getIdade() + " anos (" + p.getFaixaEtaria() + ")"));
+                sb.append("╠═══════════════════════════════════════════════╣\n");
+                sb.append("║ OFICINAS INSCRITAS:                           ║\n");
                 for (String of : p.getOficinas()) {
-                    sb.append(" - ").append(of).append("\n");
+                    sb.append(String.format("║  • %-42s ║\n", truncar(of, 42)));
                 }
+                sb.append("╚═══════════════════════════════════════════════╝");
                 return sb.toString();
             }
         }
-        return "Participante não encontrado com este CPF.";
+        return "❌ Participante não encontrado com este CPF.";
     }
 
     /**
@@ -110,26 +114,29 @@ public class GerenciadorEvento {
     }
 
     /**
-     * Gera o relatório estatístico completo exigido no PDF.
+     * Gera o relatório estatístico completo com design tabular.
      */
     public String gerarEstatisticas() {
-        if (participantes.isEmpty()) return "Nenhum dado para gerar estatísticas.";
+        if (participantes.isEmpty()) return "⚠ Nenhum dado para gerar estatísticas.";
 
         long total = participantes.size();
         long masc = participantes.stream().filter(p -> p.getSexo().equals("M")).count();
         long fem = participantes.stream().filter(p -> p.getSexo().equals("F")).count();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("\n=== ESTATÍSTICAS GERAIS ===\n");
-        sb.append(String.format("Total de Inscritos: %d\n", total));
-        sb.append(String.format("Porcentagem Homens: %.1f%%\n", (masc * 100.0 / total)));
-        sb.append(String.format("Porcentagem Mulheres: %.1f%%\n", (fem * 100.0 / total)));
+        sb.append("\n");
+        sb.append("╔════════════════════════════════════════════════════╗\n");
+        sb.append("║               RELATÓRIO ESTATÍSTICO                ║\n");
+        sb.append("╠════════════════════════════════════════════════════╣\n");
+        sb.append(String.format("║ Total de Inscritos: %-30d ║\n", total));
+        sb.append(String.format("║ Homens:             %-30s ║\n", String.format("%d (%.1f%%)", masc, (masc * 100.0 / total))));
+        sb.append(String.format("║ Mulheres:           %-30s ║\n", String.format("%d (%.1f%%)", fem, (fem * 100.0 / total))));
+        sb.append("╠════════════════════════════════════════════════════╣\n");
+        sb.append("║                  POR OFICINA                       ║\n");
+        sb.append("╠════════════════════════════════════════════════════╣\n");
 
-        sb.append("\n=== POR OFICINA ===\n");
         for (Oficina of : oficinas) {
             long qtdNaOficina = of.getInscritosAtuais();
-
-            // Contar faixas etárias nesta oficina específica
             long menores = 0;
             long maiores = 0;
 
@@ -140,16 +147,29 @@ public class GerenciadorEvento {
                 }
             }
 
-            sb.append(String.format(">> %s:\n", of.getNome()));
-            sb.append(String.format("   Total Inscritos: %d\n", qtdNaOficina));
+            sb.append(String.format("║ %-50s ║\n", truncar(of.getNome().toUpperCase(), 50)));
+            sb.append(String.format("║ -> Total: %-41d ║\n", qtdNaOficina));
             if (qtdNaOficina > 0) {
-                sb.append(String.format("   Menores de Idade: %.1f%% (%d)\n", (menores * 100.0 / qtdNaOficina), menores));
-                sb.append(String.format("   Maiores de Idade: %.1f%% (%d)\n", (maiores * 100.0 / qtdNaOficina), maiores));
+                sb.append(String.format("║    Menores: %-39s ║\n", String.format("%d (%.1f%%)", menores, (menores * 100.0 / qtdNaOficina))));
+                sb.append(String.format("║    Maiores: %-39s ║\n", String.format("%d (%.1f%%)", maiores, (maiores * 100.0 / qtdNaOficina))));
             } else {
-                sb.append("   (Sem inscritos para calcular porcentagem)\n");
+                sb.append("║    (Sem inscritos)                                 ║\n");
             }
+            sb.append("╟────────────────────────────────────────────────────╢\n");
         }
+        // Remove a última linha divisória e fecha a caixa
+        if (sb.length() > 0) sb.setLength(sb.length() - 54);
+        sb.append("╚════════════════════════════════════════════════════╝");
+
         return sb.toString();
+    }
+
+    // Auxiliar para cortar strings muito longas para caber na tabela
+    private String truncar(String str, int largura) {
+        if (str.length() > largura) {
+            return str.substring(0, largura - 3) + "...";
+        }
+        return str;
     }
 
     // --- MANIPULAÇÃO DE ARQUIVOS (PERSISTÊNCIA) ---
@@ -158,7 +178,6 @@ public class GerenciadorEvento {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ARQUIVO_DADOS))) {
             oos.writeObject(participantes);
             oos.writeObject(oficinas);
-            // System.out.println("Dados salvos automaticamente.");
         } catch (IOException e) {
             System.err.println("Erro Crítico: Não foi possível salvar os dados no disco: " + e.getMessage());
         }

@@ -1,4 +1,4 @@
-package bsi.LP2.vca;
+package bsi.LP2.vca.Savio;
 
 import java.io.Serializable;
 import java.time.LocalDate;
