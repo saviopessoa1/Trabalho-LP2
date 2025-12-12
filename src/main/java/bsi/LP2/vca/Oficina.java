@@ -1,3 +1,5 @@
+package bsi.LP2.vca;
+
 import java.io.Serializable;
 
 /**
