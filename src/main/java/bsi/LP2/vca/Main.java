@@ -86,7 +86,7 @@ public class Main {
             }
 
             // 2. Nome
-            System.out.print("Nome Completo: ");
+            System.out.print("Nome Completoss: ");
             String nome = scanner.nextLine().trim();
 
             // 3. Sexo
