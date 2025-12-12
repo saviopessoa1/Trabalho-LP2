@@ -8,7 +8,6 @@ import java.util.Scanner;
 
 public class Main {
 
-    private static SistemaGerenciador sistema = new SistemaGerenciador();
     private static Scanner scanner = new Scanner(System.in);
     private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
