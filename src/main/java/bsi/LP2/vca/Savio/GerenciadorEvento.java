@@ -10,6 +10,7 @@ public class GerenciadorEvento {
 
     private List<Participante> participantes;
     private List<Oficina> oficinas;
+    private final String ARQUIVO_DADOS = "dados_evento_ifba.bin";
 
     public GerenciadorEvento() {
         this.participantes = new ArrayList<>();
